@@ -1,0 +1,170 @@
+python manage.py shell 
+------------
+
+curl -X POST http://localhost:8000/api/token/ -H "Content-Type: application/json" -d "{\"username\": \"usuario_normal1\", \"password\": \"password_normal1\"}"
+
+
+
+
+
+
+
+Ah, entiendo el problema: cuando usas `get_or_create()` y el usuario ya existe, el bloque `defaults` **solo se aplica si se crea**. Por eso, si el usuario ya existía, no se le asigna la contraseña. Además, **no basta con pasar `password` en `defaults`**, porque Django necesita usar `set_password()` para cifrarla correctamente.
+
+Aquí tienes la forma correcta de asegurarte de que el usuario siempre tenga la contraseña que quieres:
+
+---
+
+## 1️⃣ Usuario normal
+
+```python
+from django.contrib.auth.models import User
+
+# Obtener o crear usuario normal
+user_normal, created = User.objects.get_or_create(username='usuario_normal1')
+
+# Siempre establecer correo y contraseña
+user_normal.email = 'usuario_normal1@email.com'
+user_normal.set_password('password_normal')  # Esto cifra la contraseña
+user_normal.save()
+
+if created:
+    print("Usuario normal creado:", user_normal.username)
+else:
+    print("Usuario normal actualizado:", user_normal.username)
+```
+
+---
+
+## 2️⃣ Usuario administrador / superuser
+
+```python
+from django.contrib.auth.models import User
+
+# Obtener o crear superuser
+admin_user, created = User.objects.get_or_create(username='adminG')
+
+# Establecer correo, staff y superuser, y la contraseña
+admin_user.email = 'adminG@email.com'
+admin_user.is_staff = True
+admin_user.is_superuser = True
+admin_user.set_password('1234')  # Siempre cifrar
+admin_user.save()
+
+if created:
+    print("Superuser creado:", admin_user.username)
+else:
+    print("Superuser actualizado:", admin_user.username)
+```
+
+---
+
+🔹 Con esto, incluso si el usuario ya existía, **la contraseña se actualizará correctamente** y podrás iniciar sesión en `/admin/`.
+
+Si quieres, te puedo dar **una versión ultra compacta para crear ambos en un solo bloque** listo para copiar y pegar en la shell.
+
+¿Quieres que haga eso?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------
+Perfecto. Te voy a dar **dos comandos separados para usar en la shell de Django** (`python manage.py shell`) para crear:
+
+1️⃣ **Un usuario normal**
+2️⃣ **Un usuario administrador / superuser**
+
+---
+
+from django.contrib.auth.models import User
+
+# Crear o obtener el usuario
+user, created = User.objects.get_or_create(
+    username='admin1',
+    defaults={
+        'email': 'admin1@email.com'
+    }
+)
+
+if created:
+    user.set_password('temporal')  # asignar contraseña
+    user.save()
+    print("Usuario creado:", user.username)
+else:
+    print("Usuario ya existía:", user.username)
+
+
+## 1️⃣ Crear un usuario normal
+
+
+
+
+
+```python
+from django.contrib.auth.models import User
+
+# Crear o obtener usuario normal
+user_normal, created = User.objects.get_or_create(
+    username='usuario_normal',
+    defaults={
+        'email': 'usuario_normal@email.com'
+    }
+)
+
+if created:
+    user_normal.set_password('password_normal')  # Asignar contraseña
+    user_normal.save()
+    print("Usuario normal creado:", user_normal.username)
+else:
+    print("Usuario normal ya existía:", user_normal.username)
+```
+
+✅ Este usuario **no tendrá permisos de administrador ni staff**, solo acceso a tu API según lo que definas.
+
+---
+
+## 2️⃣ Crear un usuario administrador (superuser)
+
+```python
+from django.contrib.auth.models import User
+
+# Crear o obtener superuser
+admin_user, created = User.objects.get_or_create(
+    username='admin',
+    defaults={
+        'email': 'admin@email.com',
+        'is_staff': True,       # Puede acceder al admin
+        'is_superuser': True    # Tiene todos los permisos
+    }
+)
+
+if created:
+    admin_user.set_password('password_temporal')  # Asignar contraseña
+    admin_user.save()
+    print("Superuser creado:", admin_user.username)
+else:
+    print("Superuser ya existía:", admin_user.username)
+```
+
+✅ Ahora puedes entrar a `/admin/` con:
+
+* **Usuario:** `admin`
+* **Contraseña:** `password_temporal`
+
+---
+
+Si quieres, puedo darte **una versión compacta para shell** que cree **usuarios normal y admin en un solo bloque** y no falle si ya existen.
+
+¿Quieres que haga eso?

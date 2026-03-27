@@ -1,0 +1,28 @@
+http://localhost:8000/api/token/
+
+
+curl -X GET http://localhost:8000/api/usuarios/ ^
+-H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsIn..."
+
+
+curl -X GET http://localhost:8000/api/usuarios/ -H "Authorization: Bearer "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NDcxNTY1MiwiaWF0IjoxNzc0NjI5MjUyLCJqdGkiOiJmMzcyMjc2YWIxMTU0ZGMzOGE2YjdlNjM1YWU2ODdmNSIsInVzZXJfaWQiOiI1In0.7n6m9rLADrYLVzDNqGimOpq6KyrKvpusFhfGhzXZUiI"
+
+
+curl -X GET http://localhost:8000/api/usuarios/ ^
+-H "Authorization: Bearer xxx_access_token_xxx"
+
+
+{
+    "username": "usuario_normal1",
+    "password": "password_normal"
+}
+
+
+{
+    "username": "usuario_normal1",
+    "email": "usuario1@email.com",
+    "password": "password123",
+    "is_active": true
+}
+
+crea usuario usa tocken cuidado con el refesh tocken y ver como usar el tocken para acceder a todo.
