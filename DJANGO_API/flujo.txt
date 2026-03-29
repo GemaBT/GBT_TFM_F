@@ -1,3 +1,38 @@
+Esto es lo que tenemos
+Listar usuarios	GET	/api/usuarios/	Devuelve todos los usuarios
+Crear usuario	POST	/api/usuarios/	Crea un nuevo usuario
+Recuperar detalle	GET	/api/usuarios/<id>/	Muestra un usuario específico
+Actualizar	PUT	/api/usuarios/<id>/	Actualiza todos los campos de un usuario
+Actualización parcial	PATCH	/api/usuarios/<id>/	Actualiza solo algunos campos del usuario
+Eliminar	DELETE	/api/usuarios/<id>/	Borra un usuario
+
+
+
+from django.contrib.auth.models import User
+admin = User.objects.create_superuser(
+    username='admin',
+    email='admin@example.com',
+    password='admin123'
+)
+
+
+
+from django.contrib.auth.models import User
+
+# Usuario 1
+user1 = User.objects.create_user(
+    username='usuario1',
+    email='usuario1@example.com',
+    password='usuario123'
+)
+
+# Usuario 2
+user2 = User.objects.create_user(
+    username='usuario2',
+    email='usuario2@example.com',
+    password='usuario123'
+)
+
 http://localhost:8000/api/token/
 
 
