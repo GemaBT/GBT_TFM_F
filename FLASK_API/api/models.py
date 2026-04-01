@@ -66,6 +66,7 @@ class User(Base):
     # Relación con roles
     role = relationship("Role", back_populates="users")
 
+
 # ========================
 # Tabla user_sessions
 # ========================
