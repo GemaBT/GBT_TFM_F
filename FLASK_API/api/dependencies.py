@@ -33,7 +33,8 @@ def get_db():
         db.close()
 
 # 🔹 TOKEN (esto es nuevo)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+#oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 # 🔹 USUARIO ACTUAL (esto es lo importante)
 def get_current_user(

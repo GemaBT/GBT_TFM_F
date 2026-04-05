@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login API</title>
+</head>
+<body>
+    <h1>Login API</h1>
+
+    <form id="loginForm">
+        <label>
+            Usuario:
+            <input type="text" id="username" required>
+        </label><br>
+        <label>
+            Contraseña:
+            <input type="password" id="password" required>
+        </label><br>
+        <label>
+            API:
+            <select id="apiSelect">
+                <option value="fastapi">FastAPI</option>
+                <option value="django">Django</option>
+            </select>
+        </label><br>
+        <button type="submit">Login</button>
+    </form>
+
+    <pre id="result"></pre>
+
+    <script src="main.js"></script>
+</body>
+</html>

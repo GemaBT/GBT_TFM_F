@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from api.database import SessionLocal
 from api.models import User
-from api.schemas import UserCreate, UserUpdate, PasswordUpdate
+from api.schemas import UserCreate, UserUpdate, PasswordUpdate,UserLogin
 from api.security import hash_password, verify_password, create_token
 from api.dependencies import get_current_user
 
@@ -54,6 +54,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 #Login token
+"""
 @router.post("/usuarios/login")
 def login_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
@@ -64,14 +65,32 @@ def login_user(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Contraseña incorrecta")
     
     token_data = {
-        "user_id": db_user.id,
+        #"user_id": db_user.id,
         "username": db_user.username,
-        "role_id": db_user.role_id
+        #"role_id": db_user.role_id
     }
     
     token = create_token(token_data)
     return {"access_token": token, "token_type": "bearer"}
-
+"""
+#@router.post("/usuarios/login")
+@router.post("/token")
+def login_user(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == user.username).first()
+    
+    if not db_user:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
+    
+    if not verify_password(user.password, db_user.password_hash):
+        raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+    
+    token_data = {
+        "user_id": db_user.id,
+        "username": db_user.username,
+    }
+    
+    token = create_token(token_data)
+    return {"access_token": token, "token_type": "bearer"}
 
 
 # Obtener usuario por ID

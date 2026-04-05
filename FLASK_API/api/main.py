@@ -124,7 +124,8 @@ app.add_middleware(
 # REGISTRO DE RUTAS
 # =========================
 
-app.include_router(user_routes, prefix="/users", tags=["Users"])
+#app.include_router(user_routes, prefix="/users", tags=["Users"])
+app.include_router(user_routes, prefix="/api", tags=["Users"])
 app.include_router(role_routes, prefix="/roles", tags=["Roles"])
 app.include_router(permission_routes, prefix="/permissions", tags=["Permissions"])
 app.include_router(role_permission_routes, prefix="/role-permissions", tags=["Role Permissions"])

@@ -48,8 +48,15 @@ def hash_password(password: str) -> str:
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
 
+"""
 def create_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(hours=1)
     to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+"""
+def create_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(hours=1)
+    to_encode.update({"exp": int(expire.timestamp())})  # <-- importante
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
