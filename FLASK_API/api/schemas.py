@@ -13,7 +13,8 @@ class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
-    role_id: Optional[int] = 2  # Por defecto 'usuario'
+    #role_id: Optional[int]  = 2  # Por defecto 'usuario'
+    role_id: int  # Por defecto 'usuario'
 
 #class UserCreate(BaseModel):
 #    username: str

@@ -30,7 +30,7 @@ def get_users(db: Session = Depends(get_db)):
     return db.query(User).all()
 """
 
-@router.get("/usuarios")
+@router.get("/usuarios/")
 def get_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)  # 👈 AQUÍ
@@ -38,7 +38,7 @@ def get_users(
     return db.query(User).all()
 
 #Crear usuario.- 1 admin 2-user normal
-@router.post("/usuarios/registro")
+@router.post("/usuarios/registro/")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username,
@@ -54,27 +54,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 #Login token
-"""
-@router.post("/usuarios/login")
-def login_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == user.email).first()
-    if not db_user:
-        raise HTTPException(status_code=401, detail="Usuario no encontrado")
-    
-    if not verify_password(user.password, db_user.password_hash):
-        raise HTTPException(status_code=401, detail="Contraseña incorrecta")
-    
-    token_data = {
-        #"user_id": db_user.id,
-        "username": db_user.username,
-        #"role_id": db_user.role_id
-    }
-    
-    token = create_token(token_data)
-    return {"access_token": token, "token_type": "bearer"}
-"""
 #@router.post("/usuarios/login")
-@router.post("/token")
+@router.post("/token/")
 def login_user(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     
@@ -94,7 +75,7 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
 
 
 # Obtener usuario por ID
-@router.get("/usuarios/{user_id}")
+@router.get("/usuarios/{user_id}/")
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -102,7 +83,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 #Actualizar contraseña
-@router.put("/usuarios/{user_id}/password")
+@router.put("/usuarios/{user_id}/password/")
 def change_password(user_id: int, password_data: PasswordUpdate, db: Session = Depends(get_db)):
     
     user = db.query(User).filter(User.id == user_id).first()
@@ -122,7 +103,7 @@ def change_password(user_id: int, password_data: PasswordUpdate, db: Session = D
     return {"msg": "Contraseña actualizada correctamente"}
 # Actualizar usuario. Tengo que cambiar los dos datos a la vez
 
-@router.put("/usuarios/{user_id}")
+@router.put("/usuarios/{user_id}/")
 def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -152,7 +133,7 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     return user
 """    
 # Eliminar usuario
-@router.delete("/usuarios/{user_id}")
+@router.delete("/usuarios/{user_id}/")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
