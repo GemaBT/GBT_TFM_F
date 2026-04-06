@@ -38,7 +38,7 @@ def get_users(
     return db.query(User).all()
 
 #Crear usuario.- 1 admin 2-user normal
-@router.post("/usuarios/registro/")
+@router.post("/registro/")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username,
