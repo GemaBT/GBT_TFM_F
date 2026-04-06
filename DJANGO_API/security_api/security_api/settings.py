@@ -47,9 +47,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',  # Django REST Framework
     'api',             # Tu app donde creaste la API
+    'corsheaders',     #nuevo
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',# nuevo
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -57,6 +59,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",  # o la dirección de tu frontend
+    "http://localhost:5500",
 ]
 
 ROOT_URLCONF = 'security_api.urls'

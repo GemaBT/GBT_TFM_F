@@ -7,17 +7,20 @@
         body { font-family: Arial; max-width: 600px; margin: 20px auto; }
         input, select, button { margin: 5px 0; padding: 5px; width: 100%; }
         pre { background: #f4f4f4; padding: 10px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <h1>API Frontend</h1>
 
+    <!-- Selección de API -->
     <h2>Selecciona API</h2>
     <select id="apiSelect">
         <option value="fastapi">FastAPI</option>
         <option value="django">Django</option>
     </select>
 
+    <!-- Login -->
     <h2>Login</h2>
     <form id="loginForm">
         <input type="text" id="username" placeholder="Usuario" required>
@@ -25,14 +28,21 @@
         <button type="submit">Login</button>
     </form>
 
+    <!-- Registro -->
     <h2>Registrar Usuario</h2>
     <form id="registerForm">
         <input type="text" id="regUsername" placeholder="Usuario" required>
         <input type="email" id="regEmail" placeholder="Email" required>
         <input type="password" id="regPassword" placeholder="Contraseña" required>
+        <!-- Rol solo para FastAPI -->
+        <select id="regRole">
+            <option value="1">Admin</option>
+            <option value="2" selected>Usuario</option>
+        </select>
         <button type="submit">Registrar</button>
     </form>
 
+    <!-- Listado de usuarios -->
     <h2>Usuarios</h2>
     <button id="getUsersBtn">Listar Usuarios</button>
 
@@ -41,43 +51,39 @@
 
     <script>
         const apiSelect = document.getElementById("apiSelect");
+        const registerForm = document.getElementById("registerForm");
+        const loginForm = document.getElementById("loginForm");
+        const getUsersBtn = document.getElementById("getUsersBtn");
         const result = document.getElementById("result");
 
-        const loginForm = document.getElementById("loginForm");
-        const usernameInput = document.getElementById("username");
-        const passwordInput = document.getElementById("password");
-        const registerForm = document.getElementById("registerForm");
-        const regUsername = document.getElementById("regUsername");
-        const regEmail = document.getElementById("regEmail");
-        const regPassword = document.getElementById("regPassword");
-        const getUsersBtn = document.getElementById("getUsersBtn");
-
-        // Helper para obtener la URL base según la API seleccionada
-        function getApiBase() {
-            return apiSelect.value === "fastapi" ? "http://127.0.0.1:8000" : "http://127.0.0.1:8001";
-        }
-
         // --- LOGIN ---
-        loginForm.addEventListener("submit", async (e) => {
+        loginForm.addEventListener("submit", async e => {
             e.preventDefault();
-            const username = usernameInput.value;
-            const password = passwordInput.value;
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
 
-            let url = apiSelect.value === "fastapi"
-                ? `${getApiBase()}/users/usuarios/login`
-                : `${getApiBase()}/api/token/`;
+            let url = "";
+            let body = { username, password };
+
+            if(apiSelect.value === "fastapi") {
+                url = "http://127.0.0.1:8000/api/token/";
+            } else { // Django
+                url = "http://127.0.0.1:8001/api/token/";
+            }
 
             try {
                 const res = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify(body)
                 });
+
                 const data = await res.json();
                 result.textContent = JSON.stringify(data, null, 2);
 
-                const token = data.access || data.token;
-                if (token) localStorage.setItem("token", token);
+                // Guardar token
+                const token = data.access_token || data.access;
+                if(token) localStorage.setItem("token", token);
 
             } catch(err) {
                 result.textContent = "Error: " + err;
@@ -85,22 +91,32 @@
         });
 
         // --- REGISTRO ---
-        registerForm.addEventListener("submit", async (e) => {
+        registerForm.addEventListener("submit", async e => {
             e.preventDefault();
-            const username = regUsername.value;
-            const email = regEmail.value;
-            const password = regPassword.value;
+            const username = document.getElementById("regUsername").value;
+            const email = document.getElementById("regEmail").value;
+            const password = document.getElementById("regPassword").value;
+            const role_id = parseInt(document.getElementById("regRole").value);
 
-            let url = apiSelect.value === "fastapi"
-                ? `${getApiBase()}/users/usuarios`
-                : `${getApiBase()}/api/usuarios/`;
+            let url = "";
+            let body = {};
+
+            if(apiSelect.value === "fastapi") {
+                url = "http://127.0.0.1:8000/api/registro/";
+                body = { username, email, password, role_id };
+            } else { // Django
+                url = "http://127.0.0.1:8001/api/registro/";
+                const role = role_id === 1 ? "admin" : "user";
+                body = { username, email, password, role };
+            }
 
             try {
                 const res = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify(body)
                 });
+
                 const data = await res.json();
                 result.textContent = JSON.stringify(data, null, 2);
 
@@ -112,11 +128,11 @@
         // --- LISTAR USUARIOS ---
         getUsersBtn.addEventListener("click", async () => {
             const token = localStorage.getItem("token");
-            if (!token) return alert("Primero haz login");
+            if(!token) return alert("Inicia sesión primero");
 
             let url = apiSelect.value === "fastapi"
-                ? `${getApiBase()}/users/usuarios`
-                : `${getApiBase()}/api/usuarios/`;
+                ? "http://127.0.0.1:8000/api/usuarios/"
+                : "http://127.0.0.1:8001/api/usuarios/";
 
             try {
                 const res = await fetch(url, {
@@ -124,7 +140,6 @@
                 });
                 const data = await res.json();
                 result.textContent = JSON.stringify(data, null, 2);
-
             } catch(err) {
                 result.textContent = "Error: " + err;
             }
