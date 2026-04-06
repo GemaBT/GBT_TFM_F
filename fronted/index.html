@@ -2,122 +2,133 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>API Login Front</title>
+    <title>API Frontend</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 20px auto; }
+        input, select, button { margin: 5px 0; padding: 5px; width: 100%; }
+        pre { background: #f4f4f4; padding: 10px; }
+    </style>
 </head>
 <body>
-    <h1>Login API</h1>
+    <h1>API Frontend</h1>
 
-    <label for="apiSelect">Selecciona API:</label>
+    <h2>Selecciona API</h2>
     <select id="apiSelect">
         <option value="fastapi">FastAPI</option>
         <option value="django">Django</option>
     </select>
 
+    <h2>Login</h2>
     <form id="loginForm">
         <input type="text" id="username" placeholder="Usuario" required>
         <input type="password" id="password" placeholder="Contraseña" required>
         <button type="submit">Login</button>
     </form>
 
-    <button id="listUsersBtn">Listar Usuarios</button>
-    <button id="changePasswordBtn">Cambiar Contraseña</button>
+    <h2>Registrar Usuario</h2>
+    <form id="registerForm">
+        <input type="text" id="regUsername" placeholder="Usuario" required>
+        <input type="email" id="regEmail" placeholder="Email" required>
+        <input type="password" id="regPassword" placeholder="Contraseña" required>
+        <button type="submit">Registrar</button>
+    </form>
 
+    <h2>Usuarios</h2>
+    <button id="getUsersBtn">Listar Usuarios</button>
+
+    <h2>Resultado</h2>
     <pre id="result"></pre>
 
-<script>
-const result = document.getElementById("result");
-const apiSelect = document.getElementById("apiSelect");
+    <script>
+        const apiSelect = document.getElementById("apiSelect");
+        const result = document.getElementById("result");
 
-// --- LOGIN ---
-document.getElementById("loginForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+        const loginForm = document.getElementById("loginForm");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const registerForm = document.getElementById("registerForm");
+        const regUsername = document.getElementById("regUsername");
+        const regEmail = document.getElementById("regEmail");
+        const regPassword = document.getElementById("regPassword");
+        const getUsersBtn = document.getElementById("getUsersBtn");
 
-    let body;
-    let url;
+        // Helper para obtener la URL base según la API seleccionada
+        function getApiBase() {
+            return apiSelect.value === "fastapi" ? "http://127.0.0.1:8000" : "http://127.0.0.1:8001";
+        }
 
-    if(apiSelect.value === "fastapi") {
-        url = "http://localhost:8000/users/usuarios/login";
-        body = JSON.stringify({username, password});
-    } else { // django
-        url = "http://127.0.0.1:8001/api/token/";
-        body = JSON.stringify({username, password});
-    }
+        // --- LOGIN ---
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = usernameInput.value;
+            const password = passwordInput.value;
 
-    try {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body
-        });
-        const data = await res.json();
-        result.textContent = JSON.stringify(data, null, 2);
+            let url = apiSelect.value === "fastapi"
+                ? `${getApiBase()}/users/usuarios/login`
+                : `${getApiBase()}/api/token/`;
 
-        // Guardar token
-        const token = data.access || data.token;
-        if(token) localStorage.setItem("token", token);
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                result.textContent = JSON.stringify(data, null, 2);
 
-    } catch(err) {
-        result.textContent = "Error: " + err;
-    }
-});
+                const token = data.access || data.token;
+                if (token) localStorage.setItem("token", token);
 
-// --- LISTAR USUARIOS ---
-document.getElementById("listUsersBtn").addEventListener("click", async () => {
-    const token = localStorage.getItem("token");
-    if(!token) return alert("Primero haz login");
-
-    let url = apiSelect.value === "fastapi" 
-        ? "http://localhost:8000/users/usuarios" 
-        : "http://127.0.0.1:8001/usuarios/";
-
-    try {
-        const res = await fetch(url, {
-            headers: {
-                "Authorization": apiSelect.value === "fastapi" 
-                    ? `Bearer ${token}` 
-                    : `Bearer ${token}`
+            } catch(err) {
+                result.textContent = "Error: " + err;
             }
         });
-        const data = await res.json();
-        result.textContent = JSON.stringify(data, null, 2);
-    } catch(err) {
-        result.textContent = "Error: " + err;
-    }
-});
 
-// --- CAMBIAR CONTRASEÑA ---
-document.getElementById("changePasswordBtn").addEventListener("click", async () => {
-    const old_password = prompt("Contraseña actual:");
-    const new_password = prompt("Nueva contraseña:");
-    const token = localStorage.getItem("token");
-    if(!token) return alert("Primero haz login");
+        // --- REGISTRO ---
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = regUsername.value;
+            const email = regEmail.value;
+            const password = regPassword.value;
 
-    let url, body;
-    if(apiSelect.value === "fastapi") {
-        url = "http://localhost:8000/users/usuarios/change-password";
-        body = JSON.stringify({old_password, new_password});
-    } else { // django
-        alert("Django: Implementa endpoint de cambio de contraseña");
-        return;
-    }
+            let url = apiSelect.value === "fastapi"
+                ? `${getApiBase()}/users/usuarios`
+                : `${getApiBase()}/api/usuarios/`;
 
-    try {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+                result.textContent = JSON.stringify(data, null, 2);
+
+            } catch(err) {
+                result.textContent = "Error: " + err;
+            }
         });
-        const data = await res.json();
-        result.textContent = JSON.stringify(data, null, 2);
-    } catch(err) {
-        result.textContent = "Error: " + err;
-    }
-});
-</script>
+
+        // --- LISTAR USUARIOS ---
+        getUsersBtn.addEventListener("click", async () => {
+            const token = localStorage.getItem("token");
+            if (!token) return alert("Primero haz login");
+
+            let url = apiSelect.value === "fastapi"
+                ? `${getApiBase()}/users/usuarios`
+                : `${getApiBase()}/api/usuarios/`;
+
+            try {
+                const res = await fetch(url, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                const data = await res.json();
+                result.textContent = JSON.stringify(data, null, 2);
+
+            } catch(err) {
+                result.textContent = "Error: " + err;
+            }
+        });
+    </script>
 </body>
 </html>

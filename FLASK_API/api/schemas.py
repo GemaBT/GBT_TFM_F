@@ -16,11 +16,6 @@ class UserCreate(BaseModel):
     #role_id: Optional[int]  = 2  # Por defecto 'usuario'
     role_id: int  # Por defecto 'usuario'
 
-#class UserCreate(BaseModel):
-#    username: str
-#    email: str
-#    password: str
-
 class UserUpdate(BaseModel):
     username: Optional[str]
     email: Optional[str]
