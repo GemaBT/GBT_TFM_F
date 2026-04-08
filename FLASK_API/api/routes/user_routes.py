@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from api.database import SessionLocal
 from api.models import User
 from api.schemas import UserCreate, UserUpdate, PasswordUpdate,UserLogin
-from api.security import hash_password, verify_password, create_token
+from api.security import hash_password, verify_password, create_access_token, create_refresh_token
 from api.dependencies import get_current_user
 
 router = APIRouter()
@@ -17,17 +17,13 @@ def get_db():
    
 # Listar usuarios
 """
+# sin comprobar el ID --> BOLA
 @router.get("/usuarios/")
 def get_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)  # 👈 AQUÍ
 ):
     return db.query(User).all()
-
-  
-    # 🔹 Si no es admin → solo se ve a sí mismo
-    #return db.query(User).filter(User.id == current_user.id).all()
-    #return db.query(User).filter(User.id == current_user.id).first()
 """
 @router.get("/usuarios/")
 def get_users(
@@ -75,12 +71,19 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
         "role_id": db_user.role_id, #primer cambio
     }
     
-    token = create_token(token_data)
-    return {"access_token": token, "token_type": "bearer"}
+    # token = create_token(token_data)
+    # return {"access_token": token, "token_type": "bearer"}
+
+    return { # NUEVO
+        "access_token": create_access_token(token_data),
+        "refresh_token": create_refresh_token(token_data),
+        "token_type": "bearer"
+    }
 
 
 # Obtener usuario por ID
 """
+# sin comprobar el ID --> BOLA
 @router.get("/usuarios/{user_id}/")
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -101,7 +104,9 @@ def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = D
     raise HTTPException(status_code=403, detail="No autorizado")
 
 #Actualizar contraseña
-"""@router.put("/usuarios/{user_id}/password/")
+"""
+# sin comprobar el ID --> BOLA
+@router.put("/usuarios/{user_id}/password/")
 def change_password(user_id: int, password_data: PasswordUpdate, db: Session = Depends(get_db)):
     
     user = db.query(User).filter(User.id == user_id).first()
@@ -138,8 +143,9 @@ def change_password(user_id: int, password_data: PasswordUpdate, db: Session = D
     return {"msg": "Contraseña actualizada correctamente"}
 
 # Actualizar usuario. Tengo que cambiar los dos datos a la vez
-
-"""@router.put("/usuarios/{user_id}/")
+"""
+# sin comprobar el ID --> BOLA
+@router.put("/usuarios/{user_id}/")
 def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -166,7 +172,9 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     return user
 
 # Eliminar usuario
-"""@router.delete("/usuarios/{user_id}/")
+"""
+# sin comprobar el ID --> BOLA
+@router.delete("/usuarios/{user_id}/")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
