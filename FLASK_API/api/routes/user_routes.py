@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from api.database import SessionLocal
 from api.models import User
-from api.schemas import UserCreate, UserUpdate, PasswordUpdate,UserLogin
+from api.schemas import UserCreate, UserUpdate, PasswordUpdate,UserLogin, UserOut
 from api.security import hash_password, verify_password, create_access_token, create_refresh_token
 from api.dependencies import get_current_user
 
@@ -21,24 +21,36 @@ def get_db():
 @router.get("/usuarios/")
 def get_users(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)  # 👈 AQUÍ
+    current_user: User = Depends(get_current_user)  # AQUÍ
 ):
     return db.query(User).all()
 """
-@router.get("/usuarios/")
+"""@router.get("/usuarios/")
 def get_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # 🔹 Admin → ve todos
+    # Admin → ve todos
     if current_user.role_id == 1:
         return db.query(User).all()
 
-    # 🔹 Usuario normal → solo él mismo
+    # Usuario normal → solo él mismo
     return [current_user]  # devolvemos una lista con su propio usuario
+"""
+# Acortando la información a mostrar del usuario
+@router.get("/usuarios/", response_model=list[UserOut])
+def get_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id == 1:
+        return db.query(User).all()
+
+    return [current_user]
 
 #Crear usuario.- 1 admin 2-user normal
-@router.post("/registro/")
+#@router.post("/registro/")
+@router.post("/registro/", response_model=UserOut)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username,
@@ -91,7 +103,8 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return user
 """
-@router.get("/usuarios/{user_id}/")
+#@router.get("/usuarios/{user_id}/")
+@router.get("/usuarios/{user_id}/", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -156,7 +169,8 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     db.refresh(user)
     return user
 """
-@router.put("/usuarios/{user_id}/")
+#@router.put("/usuarios/{user_id}/")
+@router.put("/usuarios/{user_id}/", response_model=UserOut)
 def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if current_user.role_id != 1 and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="No autorizado")
