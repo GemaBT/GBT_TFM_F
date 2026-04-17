@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-!9!r&5r&9zr=89+!7x+kt!+=#(=(pnec!s#7(*&jqy-4xk=r$y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -65,6 +65,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",  # o la dirección de tu frontend
     "http://localhost:5500",
 ]
+
+CORS_ALLOW_CREDENTIALS = True # preparado para cookies seguras
 
 ROOT_URLCONF = 'security_api.urls'
 

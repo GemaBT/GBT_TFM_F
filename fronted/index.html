@@ -88,7 +88,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
     result.textContent = JSON.stringify(data, null, 2);
 
-    // 🔥 LIMPIAR CAMPOS LOGIN
+    // LIMPIAR CAMPOS LOGIN
     usernameInput.value = "";
     passwordInput.value = "";
 
@@ -133,7 +133,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
 
-    // 🔥 LIMPIAR CAMPOS REGISTRO
+    // LIMPIAR CAMPOS REGISTRO
     usernameInput.value = "";
     emailInput.value = "";
     passwordInput.value = "";
@@ -180,7 +180,7 @@ document.getElementById("getUserBtn").addEventListener("click", async () => {
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
 
-    // 🔥 limpiar campo
+    // limpiar campo
     idInput.value = "";
 });
 
@@ -216,7 +216,7 @@ document.getElementById("changePassBtn").addEventListener("click", async () => {
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
 
-    // 🔥 LIMPIAR CAMPOS PASSWORD
+    // LIMPIAR CAMPOS PASSWORD
     idInput.value = "";
     oldPassInput.value = "";
     newPassInput.value = "";
