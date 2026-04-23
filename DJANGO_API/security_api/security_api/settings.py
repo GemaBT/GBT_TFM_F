@@ -34,6 +34,7 @@ SECRET_KEY = 'django-insecure-!9!r&5r&9zr=89+!7x+kt!+=#(=(pnec!s#7(*&jqy-4xk=r$y
 # DEBUG = True
 
 ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -47,7 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',  # Django REST Framework
     'api',             # Tu app donde creaste la API
-    'corsheaders',     #nuevo
+    'corsheaders',     # cabeceras CORS
+    'csp',             # cabeceras de seguridad csp
 ]
 
 MIDDLEWARE = [
@@ -59,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware', # cabeceras de seguridad csp
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -67,6 +70,15 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True # preparado para cookies seguras
+
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ("'self'",),
+        "script-src": ("'self'",),
+        "style-src": ("'self'",),
+        "img-src": ("'self'", "data:"),
+    }
+}
 
 ROOT_URLCONF = 'security_api.urls'
 
