@@ -7,7 +7,110 @@ from .permissions import IsAdminOrSelf  # tu permiso personalizado
 from rest_framework.decorators import action
 from django.contrib.auth.hashers import check_password
 from .serializers import PasswordChangeSerializer
+from .utils.logging import log_event
 
+
+from django.contrib.auth import authenticate
+#from rest_framework.views import APIView
+#from rest_framework.response import Response
+#from api.utils.logging import log_event
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
+from api.utils.logging import log_event
+from django.contrib.auth import authenticate
+
+from django.contrib.auth import authenticate
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+
+    def post(self, request, *args, **kwargs):
+
+        username = request.data.get("username")
+        password = request.data.get("password")
+        print("DATA:", request.data)
+        print("USERNAME:", username)
+
+        ip = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT")
+
+        try:
+            if username and password:
+                user = authenticate(username=username, password=password)
+            else:
+                user = None
+
+            if user:
+                log_event(user, "login_success", "200", request)
+            else:
+                log_event(None, "login_failed", "401", request)
+
+        except Exception as e:
+            print("ERROR LOGIN:", e)
+            log_event(None, "login_error", "500", request)
+
+        return super().post(request, *args, **kwargs)
+
+"""class CustomTokenObtainPairView(TokenObtainPairView):
+
+    def post(self, request, *args, **kwargs):
+        
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            log_event(request.user.id if request.user else None, "login_success", "200", request)
+        else:
+            log_event(request.user.id if request.user else None, "login_failed", "401", request)
+
+        return response
+"""
+"""
+from django.contrib.auth import authenticate
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+
+    def post(self, request, *args, **kwargs):
+
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        response = super().post(request, *args, **kwargs)
+
+        ip = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT")
+
+        if user:
+            log_event(user.id, "login_success", "200", request)
+        else:
+            log_event(None, "login_failed", "401", request)
+
+        return response
+"""
+"""
+from django.contrib.auth import authenticate
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+
+    def post(self, request, *args, **kwargs):
+
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        ip = request.META.get("REMOTE_ADDR")
+        user_agent = request.META.get("HTTP_USER_AGENT")
+
+        if not user:
+            log_event(None, "login_failed", "401", request)
+            return super().post(request, *args, **kwargs)
+
+        log_event(user.id, "login_success", "200", request)
+
+        return super().post(request, *args, **kwargs)
+"""
 # Serializer para listar usuarios
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,7 +139,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             user.is_superuser = True
             user.save()
         return user
-
+"""
 # ViewSet para CRUD de usuarios autenticado
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -53,23 +156,58 @@ class UserViewSet(viewsets.ModelViewSet):
         if user.is_superuser:
             return User.objects.all()  # Admin ve todos
         return User.objects.filter(id=user.id)  # Usuario normal ve solo su info
+    
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
 
+        # 🔹 LOG antes de borrar
+        log_event(
+            user,
+            "delete_user",
+            "200",
+            request
+        )
+
+        # 🔹 borrar usuario
+        self.perform_destroy(user)
+        print("usuario eliminado")
+
+        return Response(
+            {"msg": "Usuario eliminado"},
+            status=status.HTTP_200_OK
+        )
+"""
 # Endpoint público para registro
 class UserRegisterAPIView(APIView):
-    permission_classes = []  # público
+    permission_classes = [] 
 
     def post(self, request):
         serializer = UserCreateSerializer(data=request.data)
+
         if serializer.is_valid():
             user = serializer.save()
+            
+            log_event(
+                user,
+                "user_created",
+                "201",
+                request
+            )
+        
             return Response(
                 {
                     "id": user.id,
                     "username": user.username,
                     "email": user.email
-                },
-                status=status.HTTP_201_CREATED
+                }, status=status.HTTP_201_CREATED
             )
+        
+        log_event(
+            user,
+            "user_create_failed",
+            "400",
+            request
+        )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Tus APIViews de prueba (opcionales)
@@ -81,8 +219,6 @@ class UsuarioDetail(APIView):
     def get(self, request, pk):
         return Response({"mensaje": f"Detalle del usuario {pk}"})
     
-
-#nuevo
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [IsAdminOrSelf]
@@ -98,6 +234,29 @@ class UserViewSet(viewsets.ModelViewSet):
             return User.objects.all()
         return User.objects.filter(id=user.id)
 
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+
+        # 🔹 LOG antes de borrar
+        log_event(
+            request.user,
+            "delete_user",
+            "200",
+            request
+        )
+
+        # 🔹 borrar usuario
+        self.perform_destroy(user)
+        print("usuario eliminado")
+
+        return Response(
+            {"msg": "Usuario eliminado"},
+            status=status.HTTP_200_OK
+        )
+
+
+
+
     # NUEVO ENDPOINT: cambiar contraseña
     @action(detail=True, methods=['put'], url_path='password')
     def change_password(self, request, pk=None):
@@ -106,10 +265,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
         # CONTROL DE ACCESO (OWASP)
         if current_user.id != user.id and not current_user.is_staff:
+            log_event(user, "forbidden_access", "403", request)
             return Response({"error": "No autorizado"}, status=403)
 
         serializer = PasswordChangeSerializer(data=request.data)
         if not serializer.is_valid():
+            log_event(user, "password_change_failed", "400", request)
             return Response(serializer.errors, status=400)
 
         old_password = serializer.validated_data.get("old_password")
@@ -121,6 +282,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 return Response({"error": "Contraseña actual incorrecta"}, status=400)
 
         # Cambiar contraseña
+        log_event(user, "password_change", "200", request)
         user.set_password(new_password)
         user.save()
 

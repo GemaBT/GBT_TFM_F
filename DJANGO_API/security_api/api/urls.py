@@ -43,6 +43,7 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.views import UserViewSet, UserRegisterAPIView
+from api.views import CustomTokenObtainPairView
 
 # Router para UserViewSet
 router = routers.DefaultRouter()
@@ -50,7 +51,8 @@ router.register(r'usuarios', UserViewSet, basename='usuarios')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    #path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('registro/', UserRegisterAPIView.as_view(), name='user-register'),  # registro público
     path('', include(router.urls)),  # CRUD de usuarios autenticado
