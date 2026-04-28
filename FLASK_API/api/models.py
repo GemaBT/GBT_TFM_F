@@ -95,3 +95,4 @@ class AuthLog(Base):
     user_agent = Column(String(255))
     status = Column(String(50))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+

@@ -21,7 +21,39 @@ def get_db():
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
+from fastapi import Request
+from api.utils.logging import log_event
 
+def get_current_user(
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    ip = request.client.host
+    user_agent = request.headers.get("user-agent")
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("user_id")
+
+        if user_id is None:
+            log_event(db, None, "invalid_token", "401", ip, user_agent)
+            raise HTTPException(status_code=401, detail="Token inválido")
+
+    except JWTError:
+        log_event(db, None, "invalid_token", "401", ip, user_agent)
+        raise HTTPException(status_code=401, detail="Token inválido")
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        log_event(db, None, "user_not_found", "404", ip, user_agent)
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    return user
+
+
+"""
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
@@ -43,6 +75,9 @@ def get_current_user(
 
     return user
 
+"""
+
+# -------
 """
 
 from fastapi import Request, Depends, HTTPException

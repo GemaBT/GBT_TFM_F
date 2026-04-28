@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from api.database import SessionLocal
 from api.models import AuthLog
 from api.schemas import AuthLogCreate
+from fastapi import Request
 
 router = APIRouter()
 

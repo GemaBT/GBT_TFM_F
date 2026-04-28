@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from api.database import SessionLocal
 from api.models import Role, RolePermission, Permission
 from api.schemas import RoleCreate, RoleUpdate
+from fastapi import Request
 
 router = APIRouter()
 

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from api.database import SessionLocal
 from api.models import Permission
 from api.schemas import PermissionCreate, PermissionUpdate
+from fastapi import Request
 
 router = APIRouter()
 
