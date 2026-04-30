@@ -22,9 +22,20 @@ def log_event(
     """
 from api.models import AuthLog
 
-def log_event(db, user_id, action, status, ip, user_agent):
+"""def log_event(db, user_id, action, status, ip, user_agent):
     log = AuthLog(
         user_id=user_id,
+        action=action,
+        status=status,
+        ip_address=ip,
+        user_agent=user_agent
+    )
+    db.add(log)
+    db.commit()
+"""
+def log_event(db, user_id, action, status, ip, user_agent):
+    log = AuthLog(
+        user_id=user_id if user_id is not None else None,
         action=action,
         status=status,
         ip_address=ip,

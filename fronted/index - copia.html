@@ -57,11 +57,6 @@
 <input type="password" id="newPassword" placeholder="Nueva contraseña">
 <button id="changePassBtn">Cambiar contraseña</button>
 
-<!-- ================= BORRAR USUARIO ================= -->
-<h2>Eliminar usuario</h2>
-<input type="number" id="deleteUserId" placeholder="ID usuario">
-<button id="deleteUserBtn">Eliminar usuario</button>
-
 <h2>Resultado</h2>
 <pre id="result"></pre>
 
@@ -225,41 +220,6 @@ document.getElementById("changePassBtn").addEventListener("click", async () => {
     idInput.value = "";
     oldPassInput.value = "";
     newPassInput.value = "";
-});
-
-
-/* ================= ELIMINAR USUARIO ================= */
-document.getElementById("deleteUserBtn").addEventListener("click", async () => {
-
-    const token = localStorage.getItem("token");
-    const idInput = document.getElementById("deleteUserId");
-    const id = idInput.value;
-
-    if (!token) return alert("Inicia sesión primero");
-    if (!id) return alert("Introduce un ID de usuario");
-
-    let url = apiSelect.value === "fastapi"
-        ? `http://127.0.0.1:8000/api/usuarios/${id}/`
-        : `http://127.0.0.1:8001/api/usuarios/${id}/`;
-
-    const res = await fetch(url, {
-        method: "DELETE",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    });
-
-    let data;
-
-    try {
-        data = await res.json();  
-    } catch (e) {
-        data = { message: "Usuario eliminado correctamente" };
-    }
-
-    result.textContent = JSON.stringify(data, null, 2);
-
-    idInput.value = "";
 });
 
 </script>

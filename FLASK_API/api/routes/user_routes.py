@@ -56,7 +56,44 @@ def get_users(
 
 #Crear usuario.- 1 admin 2-user normal
 #@router.post("/registro/")
+from sqlalchemy.exc import IntegrityError
+
 @router.post("/registro/", response_model=UserOut)
+def create_user(user: UserCreate, request: Request, db: Session = Depends(get_db)):
+
+    ip = request.client.host
+    user_agent = request.headers.get("user-agent")
+
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        password_hash=hash_password(user.password),
+        role_id=user.role_id,
+        is_active=True
+    )
+
+    try:
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+    except IntegrityError:
+        db.rollback()
+
+        # Opcional: log del intento fallido
+        log_event(db, None, "duplicate_user", "400", ip, user_agent)
+
+        raise HTTPException(
+            status_code=400,
+            detail="El usuario o email ya existe"
+        )
+
+    # Solo se ejecuta si todo ha ido bien
+    log_event(db, new_user.id, "user_created", "201", ip, user_agent)
+
+    return new_user
+
+"""@router.post("/registro/", response_model=UserOut)
 def create_user(user: UserCreate,  request: Request, db: Session = Depends(get_db)):
 
     ip = request.client.host
@@ -77,7 +114,7 @@ def create_user(user: UserCreate,  request: Request, db: Session = Depends(get_d
     log_event(db, new_user.id, "user_created", "201", ip, user_agent)
 
     return new_user
-
+"""
 #Login token
 #@router.post("/usuarios/login")
 @router.post("/token/")
@@ -260,21 +297,49 @@ def delete_user(user_id: int, request: Request, db: Session = Depends(get_db), c
     user_agent = request.headers.get("user-agent")
 
     if current_user.role_id != 1 and current_user.id != user_id:
-        log_event(db, current_user.id, "forbidden_access", "403", ip, user_agent)
+#        log_event(db, current_user.id, "forbidden_access", "403", ip, user_agent)
         raise HTTPException(status_code=403, detail="No autorizado")
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        log_event(db, current_user.id, "user_not_found", "404", ip, user_agent)
+#        log_event(db, current_user.id, "user_not_found", "404", ip, user_agent)
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    log_event(db, current_user.id, "delete_user", "200", ip, user_agent)
+    
     db.delete(user)
     db.commit()
 
-    log_event(db, current_user.id, "delete_user", "200", ip, user_agent)
     return {"message": "Usuario eliminado"}
 
 
+"""from sqlalchemy.exc import SQLAlchemyError
+
+@router.delete("/usuarios/{user_id}/")
+def delete_user(user_id: int, request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+
+    ip = request.client.host
+    user_agent = request.headers.get("user-agent")
+
+    try:
+        user = db.query(User).filter(User.id == user_id).first()
+
+        if not user:
+            log_event(db, current_user.id, "user_not_found", "404", ip, user_agent)
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        db.delete(user)
+        db.commit()
+
+        log_event(db, current_user.id, "delete_user", "200", ip, user_agent)
+
+        return {"message": "Usuario eliminado correctamente"}
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        log_event(db, current_user.id, "delete_user_error", "500", ip, user_agent)
+        raise HTTPException(status_code=500, detail="Error interno eliminando usuario")
+"""
 
 
 

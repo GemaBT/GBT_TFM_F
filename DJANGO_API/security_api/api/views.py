@@ -51,66 +51,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         return super().post(request, *args, **kwargs)
 
-"""class CustomTokenObtainPairView(TokenObtainPairView):
-
-    def post(self, request, *args, **kwargs):
-        
-        response = super().post(request, *args, **kwargs)
-
-        if response.status_code == 200:
-            log_event(request.user.id if request.user else None, "login_success", "200", request)
-        else:
-            log_event(request.user.id if request.user else None, "login_failed", "401", request)
-
-        return response
-"""
-"""
-from django.contrib.auth import authenticate
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-
-    def post(self, request, *args, **kwargs):
-
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        user = authenticate(username=username, password=password)
-
-        response = super().post(request, *args, **kwargs)
-
-        ip = request.META.get("REMOTE_ADDR")
-        user_agent = request.META.get("HTTP_USER_AGENT")
-
-        if user:
-            log_event(user.id, "login_success", "200", request)
-        else:
-            log_event(None, "login_failed", "401", request)
-
-        return response
-"""
-"""
-from django.contrib.auth import authenticate
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-
-    def post(self, request, *args, **kwargs):
-
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        user = authenticate(username=username, password=password)
-
-        ip = request.META.get("REMOTE_ADDR")
-        user_agent = request.META.get("HTTP_USER_AGENT")
-
-        if not user:
-            log_event(None, "login_failed", "401", request)
-            return super().post(request, *args, **kwargs)
-
-        log_event(user.id, "login_success", "200", request)
-
-        return super().post(request, *args, **kwargs)
-"""
 # Serializer para listar usuarios
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -139,44 +79,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             user.is_superuser = True
             user.save()
         return user
-"""
-# ViewSet para CRUD de usuarios autenticado
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    permission_classes = [IsAdminOrSelf]
 
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return UserCreateSerializer
-        return UserSerializer
-
-    # Filtrar queryset según rol
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_superuser:
-            return User.objects.all()  # Admin ve todos
-        return User.objects.filter(id=user.id)  # Usuario normal ve solo su info
-    
-    def destroy(self, request, *args, **kwargs):
-        user = self.get_object()
-
-        # 🔹 LOG antes de borrar
-        log_event(
-            user,
-            "delete_user",
-            "200",
-            request
-        )
-
-        # 🔹 borrar usuario
-        self.perform_destroy(user)
-        print("usuario eliminado")
-
-        return Response(
-            {"msg": "Usuario eliminado"},
-            status=status.HTTP_200_OK
-        )
-"""
 # Endpoint público para registro
 class UserRegisterAPIView(APIView):
     permission_classes = [] 

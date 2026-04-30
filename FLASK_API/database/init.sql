@@ -38,12 +38,12 @@ CREATE TABLE user_sessions (
 
 CREATE TABLE auth_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
     action VARCHAR(50),
     ip_address VARCHAR(50),
     user_agent VARCHAR(255),
     status VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
     ON DELETE SET NULL
     ON UPDATE CASCADE
