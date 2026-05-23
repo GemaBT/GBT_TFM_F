@@ -1,0 +1,53 @@
+@startuml
+title Flujo de autenticación segura con JWT
+
+actor Cliente
+participant "API Backend" as API
+database "Base de Datos" as DB
+participant "Sistema de Hash (Argon2)" as Argon2
+
+== Login ==
+Cliente -> API : POST /login (username, password)
+API -> DB : Buscar usuario por username
+
+alt Usuario existe
+    DB --> API : Datos usuario + password_hash
+    API -> Argon2 : Verificar password (hash)
+    
+    alt Password correcta
+        Argon2 --> API : OK
+        
+        API -> API : Generar JWT firmado\n(user_id, role_id, iat, exp, jti, token_type)
+        API --> Cliente : 200 OK + access_token (+ refresh_token)
+        
+    else Password incorrecta
+        Argon2 --> API : ERROR
+        API --> Cliente : 401 Unauthorized
+    end
+
+else Usuario no existe
+    DB --> API : NULL
+    API --> Cliente : 401 Unauthorized
+end
+
+== Acceso a endpoint protegido ==
+Cliente -> API : GET /recurso\nAuthorization: Bearer <token>
+
+API -> API : Validar JWT\n(firma, expiración, estructura)
+
+alt Token válido
+    API --> Cliente : 200 OK (datos)
+else Token inválido / expirado / manipulado
+    API --> Cliente : 401 Unauthorized
+end
+
+== Casos de seguridad ==
+note right of API
+- Token manipulado → firma inválida → 401
+- Token expirado → 401
+- Sin token → 401
+- Credenciales incorrectas → 401
+- Usuario inexistente → 401
+end note
+
+@enduml

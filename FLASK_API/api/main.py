@@ -17,19 +17,32 @@ app = FastAPI(
 )
 
 origins = [
-    "http://127.0.0.1:5500",  
+    "https://127.0.0.1:5500",
+    "https://localhost:5500",
+    "http://127.0.0.1:5500",
     "http://localhost:5500"
 ]
 
 # CORS 
-app.add_middleware(
+"""app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)"""
+app.add_middleware( 
+    CORSMiddleware,
+    allow_origins=[
+        "https://127.0.0.1:5501",
+        "https://localhost:5501",
+        "http://127.0.0.1:5501",
+        "http://localhost:5501"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
 
 @app.middleware("http")   # añadimos manualmente cabeceras de seguridad.
 async def add_security_headers(request, call_next):

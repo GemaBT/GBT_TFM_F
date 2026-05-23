@@ -11,6 +11,7 @@ from api.security import hash_password, verify_password, create_access_token, cr
 from api.dependencies import get_current_user
 from fastapi import Request
 from api.utils.logging import log_event
+from fastapi import Response #
 
 router = APIRouter()
 
@@ -117,7 +118,7 @@ def create_user(user: UserCreate,  request: Request, db: Session = Depends(get_d
 """
 #Login token
 #@router.post("/usuarios/login")
-@router.post("/token/")
+"""@router.post("/token/") #token usuario hhtp
 def login_user(user: UserLogin, request: Request, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
 
@@ -151,6 +152,59 @@ def login_user(user: UserLogin, request: Request, db: Session = Depends(get_db))
         "token_type": "bearer"
     }
 
+"""
+@router.post("/token/") #token usuario https
+def login_user(
+    user: UserLogin,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db)):
+
+    ip = request.client.host
+    user_agent = request.headers.get("user-agent")
+
+    db_user = db.query(User).filter(User.username == user.username).first()
+
+    if not db_user:
+        log_event(db, None, "login_failed", "401", ip, user_agent)
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
+
+    if not verify_password(user.password, db_user.password_hash):
+        log_event(db, None, "login_failed", "401", ip, user_agent)
+        raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+
+    log_event(db, db_user.id, "login_success", "200", ip, user_agent)
+
+    token_data = {
+        "user_id": db_user.id,
+        "username": db_user.username,
+        "role_id": db_user.role_id,
+    }
+
+    access_token = create_access_token(token_data)
+    refresh_token = create_refresh_token(token_data)
+
+    # 🔐 COOKIE PRINCIPAL
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,      # en HTTPS
+        samesite="lax",
+        max_age=60 * 30
+    )
+
+    # (opcional) refresh token
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=60 * 60 * 24
+    )
+
+    return {"message": "Login correcto"}    
 """
 @router.post("/token/")
 def login_user(user: UserLogin, request: Request, db: Session = Depends(get_db)):
@@ -340,7 +394,13 @@ def delete_user(user_id: int, request: Request, db: Session = Depends(get_db), c
         log_event(db, current_user.id, "delete_user_error", "500", ip, user_agent)
         raise HTTPException(status_code=500, detail="Error interno eliminando usuario")
 """
+@router.post("/logout/") #hhtps. lo único que hace es eliminar cookies del navegador
+def logout(response: Response):
 
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return {"message": "Logout correcto"}
 
 
 

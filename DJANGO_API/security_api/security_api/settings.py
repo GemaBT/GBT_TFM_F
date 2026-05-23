@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'api',             # Tu app donde creaste la API
     'corsheaders',     # cabeceras CORS
     'csp',             # cabeceras de seguridad csp
+    "django_extensions",
 ]
 
 MIDDLEWARE = [

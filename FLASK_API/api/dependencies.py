@@ -7,6 +7,7 @@ from jose import jwt, JWTError
 from api.database import SessionLocal
 from api.models import User
 from api.security import SECRET_KEY, ALGORITHM
+from api.security import verify_token #https
 
 def get_db():
     db = SessionLocal() #Abre una conexión a la base de datos
@@ -24,7 +25,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 from fastapi import Request
 from api.utils.logging import log_event
 
-def get_current_user(
+"""def get_current_user( #http
     request: Request,
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
@@ -52,7 +53,22 @@ def get_current_user(
 
     return user
 
+""" #https
+def get_current_user(request: Request, db: Session = Depends(get_db)): 
 
+    token = request.cookies.get("access_token")
+
+    if not token:
+        raise HTTPException(status_code=401, detail="No autenticado")
+
+    payload = verify_token(token)
+
+    user = db.query(User).filter(User.id == payload["user_id"]).first()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Usuario no válido")
+
+    return user
 """
 def get_current_user(
     token: str = Depends(oauth2_scheme),

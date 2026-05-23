@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>API Frontend (Cookies)</title>
+
+    <style>
+        body { font-family: Arial; max-width: 700px; margin: 20px auto; }
+        input, select, button { margin: 5px 0; padding: 8px; width: 100%; }
+        button { cursor: pointer; }
+        pre { background: #f4f4f4; padding: 10px; white-space: pre-wrap; }
+        h2 { margin-top: 25px; }
+    </style>
+</head>
+
+<body>
+
+<h1>Frontend APIs (Cookies Auth)</h1>
+
+<select id="apiSelect">
+    <option value="fastapi">FastAPI</option>
+    <option value="django">Django</option>
+</select>
+
+<!-- LOGIN -->
+<h2>Login</h2>
+<input type="text" id="username" placeholder="Usuario">
+<input type="password" id="password" placeholder="Contraseña">
+<button id="loginBtn">Login</button>
+
+<!-- REGISTRO -->
+<h2>Registro</h2>
+<input type="text" id="regUsername" placeholder="Usuario">
+<input type="email" id="regEmail" placeholder="Email">
+<input type="password" id="regPassword" placeholder="Contraseña">
+
+<select id="regRole">
+    <option value="1">Admin</option>
+    <option value="2" selected>Usuario</option>
+</select>
+
+<button id="registerBtn">Registrar</button>
+
+<!-- USUARIOS -->
+<h2>Usuarios</h2>
+<button id="getUsersBtn">Listar usuarios</button>
+
+<!-- BUSCAR -->
+<h2>Buscar usuario por ID</h2>
+<input type="number" id="userId" placeholder="ID usuario">
+<button id="getUserBtn">Buscar usuario</button>
+
+<!-- PASSWORD -->
+<h2>Cambiar contraseña</h2>
+<input type="number" id="passUserId" placeholder="ID usuario">
+<input type="password" id="oldPassword" placeholder="Contraseña actual">
+<input type="password" id="newPassword" placeholder="Nueva contraseña">
+<button id="changePassBtn">Cambiar contraseña</button>
+
+<!-- DELETE -->
+<h2>Eliminar usuario</h2>
+<input type="number" id="deleteUserId" placeholder="ID usuario">
+<button id="deleteUserBtn">Eliminar usuario</button>
+
+<h2>Resultado</h2>
+<pre id="result"></pre>
+
+<script>
+
+const apiSelect = document.getElementById("apiSelect");
+const result = document.getElementById("result");
+
+/* ================= LOGIN ================= */
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const url = apiSelect.value === "fastapi"
+        ? "http://127.0.0.1:8000/api/token/"
+        : "http://127.0.0.1:8001/api/token/";
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",   // 🔥 IMPORTANTE
+        body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+    result.textContent = JSON.stringify(data, null, 2);
+
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+});
+
+
+/* ================= REGISTRO ================= */
+document.getElementById("registerBtn").addEventListener("click", async () => {
+
+    const username = document.getElementById("regUsername").value;
+    const email = document.getElementById("regEmail").value;
+    const password = document.getElementById("regPassword").value;
+    const role_id = parseInt(document.getElementById("regRole").value);
+
+    const url = apiSelect.value === "fastapi"
+        ? "http://127.0.0.1:8000/api/registro/"
+        : "http://127.0.0.1:8001/api/registro/";
+
+    const body = apiSelect.value === "fastapi"
+        ? { username, email, password, role_id }
+        : { username, email, password, role: role_id === 1 ? "admin" : "user" };
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+    result.textContent = JSON.stringify(data, null, 2);
+});
+
+
+/* ================= LISTAR USUARIOS ================= */
+document.getElementById("getUsersBtn").addEventListener("click", async () => {
+
+    const url = apiSelect.value === "fastapi"
+        ? "http://127.0.0.1:8000/api/usuarios/"
+        : "http://127.0.0.1:8001/api/usuarios/";
+
+    const res = await fetch(url, {
+        credentials: "include"   // 🔥 COOKIE
+    });
+
+    const data = await res.json();
+    result.textContent = JSON.stringify(data, null, 2);
+});
+
+
+/* ================= USUARIO POR ID ================= */
+document.getElementById("getUserBtn").addEventListener("click", async () => {
+
+    const id = document.getElementById("userId").value;
+
+    const url = apiSelect.value === "fastapi"
+        ? `http://127.0.0.1:8000/api/usuarios/${id}/`
+        : `http://127.0.0.1:8001/api/usuarios/${id}/`;
+
+    const res = await fetch(url, {
+        credentials: "include"
+    });
+
+    const data = await res.json();
+    result.textContent = JSON.stringify(data, null, 2);
+});
+
+
+/* ================= PASSWORD ================= */
+document.getElementById("changePassBtn").addEventListener("click", async () => {
+
+    const user_id = document.getElementById("passUserId").value;
+    const old_password = document.getElementById("oldPassword").value;
+    const new_password = document.getElementById("newPassword").value;
+
+    const url = apiSelect.value === "fastapi"
+        ? `http://127.0.0.1:8000/api/usuarios/${user_id}/password/`
+        : `http://127.0.0.1:8001/api/usuarios/${user_id}/password/`;
+
+    const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ old_password, new_password })
+    });
+
+    const data = await res.json();
+    result.textContent = JSON.stringify(data, null, 2);
+});
+
+
+/* ================= DELETE ================= */
+document.getElementById("deleteUserBtn").addEventListener("click", async () => {
+
+    const id = document.getElementById("deleteUserId").value;
+
+    const url = apiSelect.value === "fastapi"
+        ? `http://127.0.0.1:8000/api/usuarios/${id}/`
+        : `http://127.0.0.1:8001/api/usuarios/${id}/`;
+
+    const res = await fetch(url, {
+        method: "DELETE",
+        credentials: "include"
+    });
+
+    const data = await res.json();
+    result.textContent = JSON.stringify(data, null, 2);
+});
+
+</script>
+
+</body>
+</html>
