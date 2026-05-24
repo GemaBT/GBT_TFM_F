@@ -17,8 +17,8 @@ app = FastAPI(
 )
 
 origins = [
-    "https://127.0.0.1:5500",
-    "https://localhost:5500",
+    "https://127.0.0.1:5501",
+    "https://localhost:5501",
     "http://127.0.0.1:5500",
     "http://localhost:5500"
 ]
@@ -30,21 +30,34 @@ origins = [
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)"""
+)
+"""
+
 app.add_middleware( 
     CORSMiddleware,
     allow_origins=[
         "https://127.0.0.1:5501",
-        "https://localhost:5501",
+        #"https://localhost:5501",
         "http://127.0.0.1:5501",
-        "http://localhost:5501"
+        #"http://localhost:5501"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+"""
 
-@app.middleware("http")   # añadimos manualmente cabeceras de seguridad.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://127.0.0.1:5501"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+"""
+"""@app.middleware("http")   # añadimos manualmente cabeceras de seguridad.
 async def add_security_headers(request, call_next):
     response = await call_next(request)
 
@@ -53,7 +66,23 @@ async def add_security_headers(request, call_next):
     response.headers["Content-Security-Policy"] = "default-src 'self'"
 
     return response
+"""
+@app.middleware("http") #https
+async def add_security_headers(request, call_next):
 
+    response = await call_next(request)
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https://fastapi.tiangolo.com;"
+    )
+
+    return response
 # =========================
 # REGISTRO DE RUTAS
 # =========================

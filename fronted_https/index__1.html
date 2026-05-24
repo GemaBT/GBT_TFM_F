@@ -77,8 +77,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     const password = document.getElementById("password").value;
 
     const url = apiSelect.value === "fastapi"
-        ? "https://127.0.0.1:8000/api/token/"
-        : "https://127.0.0.1:8001/api/token/";
+        ? "http://127.0.0.1:8000/api/token/"
+        : "http://127.0.0.1:8001/api/token/";
 
     const res = await fetch(url, {
         method: "POST",
@@ -104,28 +104,20 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     const role_id = parseInt(document.getElementById("regRole").value);
 
     const url = apiSelect.value === "fastapi"
-        ? "https://127.0.0.1:8000/api/registro/"
-        : "https://127.0.0.1:8001/api/registro/";
+        ? "http://127.0.0.1:8000/api/registro/"
+        : "http://127.0.0.1:8001/api/registro/";
 
     const body = apiSelect.value === "fastapi"
         ? { username, email, password, role_id }
         : { username, email, password, role: role_id === 1 ? "admin" : "user" };
 
     const res = await fetch(url, {
-    	method: "POST",
-    	headers: { "Content-Type": "application/json" },
-    	credentials: "include",
-    	body: JSON.stringify(body)
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
     });
 
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
-
-    document.getElementById("regUsername").value = "";
-    document.getElementById("regEmail").value = "";
-    document.getElementById("regPassword").value = "";
-
-
 });
 
 
@@ -133,8 +125,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
 document.getElementById("getUsersBtn").addEventListener("click", async () => {
 
     const url = apiSelect.value === "fastapi"
-        ? "https://127.0.0.1:8000/api/usuarios/"
-        : "https://127.0.0.1:8001/api/usuarios/";
+        ? "http://127.0.0.1:8000/api/usuarios/"
+        : "http://127.0.0.1:8001/api/usuarios/";
 
     const res = await fetch(url, {
         credentials: "include"   // 🔥 COOKIE
@@ -142,7 +134,6 @@ document.getElementById("getUsersBtn").addEventListener("click", async () => {
 
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
-
 });
 
 
@@ -152,8 +143,8 @@ document.getElementById("getUserBtn").addEventListener("click", async () => {
     const id = document.getElementById("userId").value;
 
     const url = apiSelect.value === "fastapi"
-        ? `https://127.0.0.1:8000/api/usuarios/${id}/`
-        : `https://127.0.0.1:8001/api/usuarios/${id}/`;
+        ? `http://127.0.0.1:8000/api/usuarios/${id}/`
+        : `http://127.0.0.1:8001/api/usuarios/${id}/`;
 
     const res = await fetch(url, {
         credentials: "include"
@@ -161,8 +152,6 @@ document.getElementById("getUserBtn").addEventListener("click", async () => {
 
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
-
-    document.getElementById("userId").value = "";
 });
 
 
@@ -174,8 +163,8 @@ document.getElementById("changePassBtn").addEventListener("click", async () => {
     const new_password = document.getElementById("newPassword").value;
 
     const url = apiSelect.value === "fastapi"
-        ? `https://127.0.0.1:8000/api/usuarios/${user_id}/password/`
-        : `https://127.0.0.1:8001/api/usuarios/${user_id}/password/`;
+        ? `http://127.0.0.1:8000/api/usuarios/${user_id}/password/`
+        : `http://127.0.0.1:8001/api/usuarios/${user_id}/password/`;
 
     const res = await fetch(url, {
         method: "PUT",
@@ -186,10 +175,6 @@ document.getElementById("changePassBtn").addEventListener("click", async () => {
 
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
-
-    document.getElementById("passUserId").value = "";
-    document.getElementById("oldPassword").value = "";
-    document.getElementById("newPassword").value = "";
 });
 
 
@@ -199,8 +184,8 @@ document.getElementById("deleteUserBtn").addEventListener("click", async () => {
     const id = document.getElementById("deleteUserId").value;
 
     const url = apiSelect.value === "fastapi"
-        ? `https://127.0.0.1:8000/api/usuarios/${id}/`
-        : `https://127.0.0.1:8001/api/usuarios/${id}/`;
+        ? `http://127.0.0.1:8000/api/usuarios/${id}/`
+        : `http://127.0.0.1:8001/api/usuarios/${id}/`;
 
     const res = await fetch(url, {
         method: "DELETE",
@@ -209,8 +194,6 @@ document.getElementById("deleteUserBtn").addEventListener("click", async () => {
 
     const data = await res.json();
     result.textContent = JSON.stringify(data, null, 2);
-
-    document.getElementById("deleteUserId").value = "";
 });
 
 </script>
