@@ -18,11 +18,14 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from api.utils.logging import log_event
-from django.contrib.auth import authenticate
 
-from django.contrib.auth import authenticate
+#https
+from rest_framework_simplejwt.tokens import RefreshToken
+#from django.http import Response
+from rest_framework.response import Response
 
-class CustomTokenObtainPairView(TokenObtainPairView):
+"""
+class CustomTokenObtainPairView(TokenObtainPairView):http
 
     def post(self, request, *args, **kwargs):
 
@@ -50,7 +53,55 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             log_event(None, "login_error", "500", request)
 
         return super().post(request, *args, **kwargs)
+"""
 
+#https
+from django.contrib.auth import authenticate
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from api.utils.logging import log_event
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+
+    def post(self, request, *args, **kwargs):
+
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user is None:
+            return Response({"error": "Credenciales inválidas"}, status=401)
+
+        refresh = RefreshToken.for_user(user)
+        access = str(refresh.access_token)
+
+        response = Response({"message": "Login correcto"})
+
+        # ACCESS TOKEN (correcto)
+        response.set_cookie(
+            key="access_token",
+            value=access,
+            httponly=True,
+            secure=True,
+            samesite="Lax"
+        )
+
+        # REFRESH TOKEN
+        response.set_cookie(
+            key="refresh_token",
+            value=str(refresh),
+            httponly=True,
+            secure=True,
+            samesite="Lax"
+        )
+
+        log_event(user, "login_success", "200", request)
+
+        return response
+
+#-----------
 # Serializer para listar usuarios
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

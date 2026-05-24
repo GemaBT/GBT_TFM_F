@@ -65,9 +65,9 @@ MIDDLEWARE = [
     'csp.middleware.CSPMiddleware', # cabeceras de seguridad csp
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",  # o la dirección de tu frontend
-    "http://localhost:5500",
+CORS_ALLOWED_ORIGINS = [#http 5500
+    "https://127.0.0.1:5501",  # o la dirección de tu frontend
+    "https://localhost:5501",
 ]
 
 CORS_ALLOW_CREDENTIALS = True # preparado para cookies seguras
@@ -159,13 +159,22 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-REST_FRAMEWORK = {
+"""REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+}
+"""
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "api.authentication.CookieJWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    )
 }
 
 from datetime import timedelta
@@ -178,3 +187,10 @@ SIMPLE_JWT = {
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+"""
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "api.auth.CookieJWTAuthentication",
+    )
+}
+"""
