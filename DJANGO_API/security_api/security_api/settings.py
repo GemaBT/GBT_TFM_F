@@ -10,110 +10,119 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import pymysql
-pymysql.install_as_MySQLdb()
+import pymysql # Importa la librería PyMySQL: conector entre Python y MySQL.
+pymysql.install_as_MySQLdb() # Usa PyMySQL como si fuera MySQLdb
 
-from pathlib import Path
-import os
-from dotenv import load_dotenv
+from pathlib import Path # Importa la clase Path para trabajar con rutas de archivos.
+import os # Importa el módulo del sistema operativo.
+from dotenv import load_dotenv # Importa la función para cargar archivos .env.
 
-load_dotenv()
+load_dotenv() # Carga esas variables en Python.
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_DIR = Path(__file__).resolve().parent.parent # Permite manejar rutas del sistema de forma segura y moderna.
+                                                  # compatibilidad entre Windows / Linux / Mac
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# Clave secreta interna de Django. Nunca debe exponerse en producción. Guardarla en .env.
 SECRET_KEY = 'django-insecure-!9!r&5r&9zr=89+!7x+kt!+=#(=(pnec!s#7(*&jqy-4xk=r$y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
+# DEBUG = True # Activa modo desarrollo. En producción es peligroso porque puede revelar: rutas internas, consultas SQL, variables sensibles, configuración.
 
+# Define qué dominios pueden acceder al servidor Django.
+# Previene ataques de tipo: Host Header Injection
 ALLOWED_HOSTS = []
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
+# Lista de aplicaciones activas en Django.
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',  # Django REST Framework
-    'api',             # Tu app donde creaste la API
+    'django.contrib.admin',  # Panel administrativo de Django. 
+    'django.contrib.auth',   # Sistema de autenticación
+    'django.contrib.contenttypes', # Permite a Django relacionar modelos dinámicamente.
+    'django.contrib.sessions', # Sistema de sesiones de usuarios.
+    'django.contrib.messages', # Sistema de mensajes temporales. "Usuario creado correctamente"
+    'django.contrib.staticfiles', # Gestiona archivos estáticos:
+    'rest_framework',  # Django REST Framework. Activa DRF
+    'api',             # Tu app donde creaste la API. App personalizada
     'corsheaders',     # cabeceras CORS
-    'csp',             # cabeceras de seguridad csp
-    "django_extensions",
+    'csp',             # cabeceras de seguridad csp. Activa Content Security Policy.
+    "django_extensions", # Herramientas extra para desarrollo. Generar diagramas, shell avanzado, utilidades de debugging
 ]
 
+"""
+Un middleware es un componente intermedio que intercepta y 
+procesa las peticiones y respuestas HTTP durante el ciclo de 
+ejecución de una aplicación web, permitiendo implementar 
+funcionalidades globales como autenticación, seguridad, 
+sesiones o validación de solicitudes.
+"""
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',# nuevo
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'csp.middleware.CSPMiddleware', # cabeceras de seguridad csp
+    'corsheaders.middleware.CorsMiddleware',# Gestiona CORS
+    'django.middleware.security.SecurityMiddleware', # Middleware de seguridad nativo
+    'django.contrib.sessions.middleware.SessionMiddleware', # Gestiona sessiones de usuario
+    'django.middleware.common.CommonMiddleware', # Funciones HTTP generales: normalización URLs, petición básica
+    'django.middleware.csrf.CsrfViewMiddleware', # Protección frente a ataques CSRF
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # Asocia usuario autenticado a cada request. " request.user"
+    'django.contrib.messages.middleware.MessageMiddleware', # Mensajes temporales del sistema
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', # Protege frente a Clickjacking. Evita iframes maliciosos
+    'csp.middleware.CSPMiddleware', # cabeceras de seguridad csp. Aplica políticas CSP al navegador
 ]
 
-CORS_ALLOWED_ORIGINS = [#http 5500
-    "https://127.0.0.1:5501",  # o la dirección de tu frontend
+# Define que fronteds pueden hacer peticiones. Fronted permitido.
+CORS_ALLOWED_ORIGINS = [ #http 5500. Puerto 
+    "https://127.0.0.1:5501",  
     "https://localhost:5501",
 ]
 
-CORS_ALLOW_CREDENTIALS = True # preparado para cookies seguras
+CORS_ALLOW_CREDENTIALS = True # Permite envío de cookies. Necesario para JWT en cookies HTTPOnly
 
+# Define políticas CSP.
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
-        "default-src": ("'self'",),
-        "script-src": ("'self'",),
-        "style-src": ("'self'",),
-        "img-src": ("'self'", "data:"),
+        "default-src": ("'self'",), # solo permite recursos del mismo dominio.
+        "script-src": ("'self'",),  # bloquea scripts externos. Reduce XSS.
+        "style-src": ("'self'",),   # solo CSS local.
+        "img-src": ("'self'", "data:"), # permite imágenes locales y base64
     }
 }
 
+# Archivo principal de rutas.
 ROOT_URLCONF = 'security_api.urls'
 
+# Configuración del motor de plantillas HTML.
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'BACKEND': 'django.template.backends.django.DjangoTemplates', # Motor de plantilla usar
+        'DIRS': [],  # Define carpetas globales donde Django buscará templates HTML.
         'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        'OPTIONS': { # Configuraciones adicionales del motor de plantillas.
+            'context_processors': [ # Son funciones que inyectan variables automáticamente en TODOS los templates.
+                'django.template.context_processors.request', # hace disponible el request dentro del HTML.
+                'django.contrib.auth.context_processors.auth', # variables relacionadas con autenticación
+                'django.contrib.messages.context_processors.messages', # Permite mostrar mensajes temporales en HTML.
             ],
         },
     },
 ]
 
+# Punto de entrada WSGI
 WSGI_APPLICATION = 'security_api.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-"""DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-"""
+# Configuración de MySQL.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.mysql', # Motor MySQL. Variables de entorno. lee los datos de .env
         'NAME': os.getenv("MYSQL_DATABASE"),
         'USER': os.getenv("MYSQL_USER"),
         'PASSWORD': os.getenv("MYSQL_PASSWORD"),
@@ -145,21 +154,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-us'  # Idioma del sistema
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'UTC'   # Zona horaria
 
-USE_I18N = True
+USE_I18N = True     # Internacionalización activada
 
-USE_TZ = True
+USE_TZ = True       # usa fechas con timezone
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = 'static/'  # Ruta de archivos estáticos
 
-"""REST_FRAMEWORK = {
+"""REST_FRAMEWORK = {  # autenticación sin cookie.
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -170,27 +179,39 @@ STATIC_URL = 'static/'
 """
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "api.authentication.CookieJWTAuthentication",
+        "api.authentication.CookieJWTAuthentication",  # autenticación personalizada JWT por cookies
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticated", # Todas las rutas requieren login por defecto
     )
 }
 
 from datetime import timedelta
+# Configuración JWT.
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30), # Duración token acceso
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Duración token renovavión
+    'AUTH_HEADER_TYPES': ('Bearer',),    # Formato estándar
 }
 
+# Define backend autenticación Django.
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.ModelBackend', # Backend estándar Django.
 ]
+
 """
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "api.auth.CookieJWTAuthentication",
-    )
-}
+añadiendo ese bloque en settings.py, se implementa Argon2, pero con matices importantes.
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+]
+
+Argon2 pasa a ser el algoritmo principal (prioritario) para nuevas contraseñas.
+PBKDF2 queda como fallback de compatibilidad (usuarios o passwords ya existentes).
+Django usa el primer hasher de la lista para crear nuevas contraseñas.
+
+Las nuevas contraseñas se guardan con Argon2
+Las contraseñas antiguas siguen en PBKDF2 hasta que el usuario las cambie
+Django puede re-hashear automáticamente cuando el usuario inicia sesión (rehash upgrade)
 """

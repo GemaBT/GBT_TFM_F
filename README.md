@@ -39,3 +39,11 @@ README.md
 4. Analizar resultados y documentar conclusiones.
 
 ## Arrancar APIs
+Servicio
+Comando de ejecución
+Frontend: http-server -S -p 5501 -C "C:\Users\santi\Documents\gema_principal\15.-Master_UNIR\TFM_GBT\certs\localhost.pem" -K "C:\Users\santi\Documents\gema_principal\15.-Master_UNIR\TFM_GBT\certs\localhost-key.pem"
+
+FastAPI: python -m uvicorn api.main:app --reload --ssl-certfile="C:\Users\santi\Documents\gema_principal\15.-Master_UNIR\TFM_GBT\certs\localhost.pem" --ssl-keyfile="C:\Users\santi\Documents\gema_principal\15.-Master_UNIR\TFM_GBT\certs\localhost-key.pem"
+
+Django: python manage.py runserver_plus 8001 --cert-file "C:\Users\santi\Documents\gema_principal\15.-Master_UNIR\TFM_GBT\certs\localhost.pem" --key-file "C:\Users\santi\Documents\gema_principal\15.-Master_UNIR\TFM_GBT\certs\localhost-key.pem"
+

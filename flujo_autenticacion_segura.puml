@@ -4,7 +4,7 @@ title Flujo de autenticación segura con JWT
 actor Cliente
 participant "API Backend" as API
 database "Base de Datos" as DB
-participant "Sistema de Hash (Argon2)" as Argon2
+participant "Sistema de Hash" as Hash
 
 == Login ==
 Cliente -> API : POST /login (username, password)
@@ -12,16 +12,16 @@ API -> DB : Buscar usuario por username
 
 alt Usuario existe
     DB --> API : Datos usuario + password_hash
-    API -> Argon2 : Verificar password (hash)
-    
+    API -> Hash : Verificar password (hash)
+
     alt Password correcta
-        Argon2 --> API : OK
-        
+        Hash --> API : OK
+
         API -> API : Generar JWT firmado\n(user_id, role_id, iat, exp, jti, token_type)
         API --> Cliente : 200 OK + access_token (+ refresh_token)
-        
+
     else Password incorrecta
-        Argon2 --> API : ERROR
+        Hash --> API : ERROR
         API --> Cliente : 401 Unauthorized
     end
 
